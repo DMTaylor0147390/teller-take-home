@@ -18,9 +18,7 @@ The instructions for how to run this server are in the above section.
 
 To enroll a given user, run the following cURL request:
 
-```curl -X POST localhost:4000/enroll -d '{"username": <username>, "password": <password>, "device_type": <"SMS" or "VOICE">}'
-                                      -H 'accept: application/json'
-                                      -H 'content-type: application/json'```
+```curl -X POST localhost:4000/enroll -d '{"username": <username>, "password": <password>, "device_type": <"SMS" or "VOICE">' -H 'accept: application/json' -H 'content-type: application/json'```
 
 To list the accounts for a given user, run the following cURL request:
 
