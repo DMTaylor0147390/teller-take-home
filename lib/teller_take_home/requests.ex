@@ -1,49 +1,49 @@
 defmodule TellerTakeHome.Requests do
 
-  def base_url(url \\ nil) do
+  defp base_url(url \\ nil) do
     url || "test.teller.engineering"
   end
 
-  def url(route \\ "") do
+  defp url(route \\ "") do
     base_url("https://test.teller.engineering") <> route
   end
 
-  def get_device_id() do
+  defp get_device_id() do
     "WXUOP2GPGJF7AAVB"
   end
 
-  def username(s \\ nil) do
+  defp username(s \\ nil) do
     s || "yellow_molly"
   end
 
-  def password(p \\ nil) do
+  defp password(p \\ nil) do
     p || "democraticpeoplesrepublicofkorea"
   end
 
-  def api_key(k \\ nil) do
+  defp api_key(k \\ nil) do
     k || "HowManyGenServersDoesItTakeToCrackTheBank?"
   end
 
-  def path_to_keys(path) do
+  defp path_to_keys(path) do
     %{"/signin/mfa" => ["teller-mission", "user-agent", "api-key", "device-id", "r-token", "f-token", "content-type", "accept"],
       "/signin/mfa/verify" => ["teller-mission", "user-agent", "api-key", "device-id", "r-token", "f-token", "content-type", "accept"]}
     |> Map.get(path, ["teller-mission", "user-agent", "api-key", "device-id", "r-token", "f-token", "content-type", "accept"])
   end
 
-  def hash_pw(password) do
+  defp hash_pw(password) do
     password |> Base.encode16 |> String.downcase
   end
 
-  def hash_username_and_pw(username, password) do
+  defp hash_username_and_pw(username, password) do
     "#{username}:#{hash_pw(password)}" |> Base.encode64
   end
 
-  def store_a_token(a_token, basic_auth) when is_binary(basic_auth) do
+  defp store_a_token(a_token, basic_auth) when is_binary(basic_auth) do
     [username, password] = basic_auth |> Base.decode64! |> String.split(":")
     store_a_token(a_token, %{"username" => username, "password" => password})
   end
 
-  def store_a_token(a_token, %{"username" => username, "password" => password}) do
+  defp store_a_token(a_token, %{"username" => username, "password" => password}) do
     if !File.exists?("tokens.txt") do
       File.touch!("tokens.txt")
       File.write!("tokens.txt", Jason.encode!(%{}))
@@ -59,7 +59,7 @@ defmodule TellerTakeHome.Requests do
     File.write!("tokens.txt", new_token_data |> Jason.encode!())
   end
 
-  def get_a_token(basic_auth_token) do
+  defp get_a_token(basic_auth_token) do
     if File.exists?("tokens.txt") do
       [username, password] = basic_auth_token |> Base.decode64!() |> String.split(":")
       hash = hash_username_and_pw(username, password)
@@ -67,7 +67,7 @@ defmodule TellerTakeHome.Requests do
     end
   end
 
-  def parse_f_token_spec(spec, data) do
+  defp parse_f_token_spec(spec, data) do
     transformed_spec = spec
     |> Base.decode64!
     |> String.replace("last-request-id", data["last-request-id"])
@@ -81,7 +81,7 @@ defmodule TellerTakeHome.Requests do
     |> Base.encode64(padding: false)
   end
 
-  def headers(_, "/signin") do
+  defp headers(_, "/signin") do
     [{"content-type", "application/json"},
      {"device-id", get_device_id()},
      {"api-key", "HowManyGenServersDoesItTakeToCrackTheBank?"},
@@ -89,7 +89,7 @@ defmodule TellerTakeHome.Requests do
      {"user-agent", "Teller Bank iOS 2.0"}]
   end
 
-  def headers(_, "/signin/token") do
+  defp headers(_, "/signin/token") do
     [{"content-type", "application/json"},
      {"device-id", get_device_id()},
      {"api-key", "HowManyGenServersDoesItTakeToCrackTheBank?"},
@@ -97,7 +97,7 @@ defmodule TellerTakeHome.Requests do
      {"user-agent", "Teller Bank iOS 2.0"}]
   end
 
-  def headers(headers, path = "/signin/mfa") do
+  defp headers(headers, path = "/signin/mfa") do
     headers = headers |> Map.new()
 
     headers
@@ -112,7 +112,7 @@ defmodule TellerTakeHome.Requests do
     |> Enum.to_list()
   end
 
-  def headers(headers, path = "/signin/mfa/verify") do
+  defp headers(headers, path = "/signin/mfa/verify") do
     headers = headers |> Map.new()
 
     headers
@@ -127,7 +127,7 @@ defmodule TellerTakeHome.Requests do
     |> Enum.to_list()
   end
 
-  def headers(headers, path = "/accounts") do
+  defp headers(headers, path = "/accounts") do
     headers = headers |> Map.new()
 
     headers
@@ -143,7 +143,7 @@ defmodule TellerTakeHome.Requests do
   end
 
 
-  def headers(headers, path = "/accounts/" <> id) do
+  defp headers(headers, path = "/accounts/" <> id) do
     headers = headers |> Map.new()
 
     headers
@@ -159,48 +159,48 @@ defmodule TellerTakeHome.Requests do
   end
 
 
-  def signin(data = %{"username" => _username, "password" => _password}, headers) do
+  defp signin(data = %{"username" => _username, "password" => _password}, headers) do
     path = "/signin"
 
     url(path)
     |> HTTPoison.post!(Jason.encode!(data), headers |> headers(path))
   end
 
-  def signin_mfa(data = %{"device_id" => _device_id}, headers) do
+  defp signin_mfa(data = %{"device_id" => _device_id}, headers) do
     path = "/signin/mfa"
     url(path)
     |> HTTPoison.post!(Jason.encode!(data), headers |> headers(path))
   end
 
-  def signin_mfa_verify(data = %{"code" => _code}, headers) do
+  defp signin_mfa_verify(data = %{"code" => _code}, headers) do
     path = "/signin/mfa/verify"
 
     url(path)
     |> HTTPoison.post!(Jason.encode!(data), headers |> headers(path))
   end
 
-  def signin_token(data = %{"token" => _token}, headers) do
+  defp signin_token(data = %{"token" => _token}, headers) do
     path = "/signin/token"
 
     url(path)
     |> HTTPoison.post!(Jason.encode!(data), headers |> headers(path))
   end
 
-  def get_account_balances(account_id, headers) do
+  defp get_account_balances(account_id, headers) do
     path = "/accounts/#{account_id}/balances"
 
     url(path)
     |> HTTPoison.get!(headers |> headers(path))
   end
 
-  def get_account_details(account_id, headers) do
+  defp get_account_details(account_id, headers) do
     path = "/accounts/#{account_id}/details"
 
     url(path)
     |> HTTPoison.get!(headers |> headers(path))
   end
 
-  def get_account_transactions(account_id, headers) do
+  defp get_account_transactions(account_id, headers) do
     path = "/accounts/#{account_id}/transactions"
 
     url(path)
@@ -237,7 +237,7 @@ defmodule TellerTakeHome.Requests do
     {200, "User enrolled"}
   end
 
-  def get_basic_auth(headers) do
+  defp get_basic_auth(headers) do
     headers
     |> Map.new()
     |> Map.get("authorization")
