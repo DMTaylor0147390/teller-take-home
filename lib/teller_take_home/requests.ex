@@ -16,10 +16,6 @@ defmodule TellerTakeHome.Requests do
     s || "yellow_molly"
   end
 
-  defp password(p \\ nil) do
-    p || "democraticpeoplesrepublicofkorea"
-  end
-
   defp api_key(k \\ nil) do
     k || "HowManyGenServersDoesItTakeToCrackTheBank?"
   end
