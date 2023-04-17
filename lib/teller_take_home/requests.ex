@@ -255,7 +255,12 @@ defmodule TellerTakeHome.Requests do
         |> Map.get("accounts")
         |> Map.values()
         |> List.flatten()
-        |> Enum.map(fn m -> {m["id"], get_account_balances(m["id"], token_signin_response.headers) |> Map.get(:body) |> Jason.decode!} end)
+        |> Enum.map(fn m -> {m["id"], get_account_balances(m["id"], token_signin_response.headers)} end)
+        |> Enum.map(fn {id, balances_response} ->
+          {id, get_account_details(id, balances_response.headers)
+               |> Map.get(:body)
+               |> Jason.decode!()
+               |> Map.merge(balances_response |> Map.get(:body) |> Jason.decode!())} end)
         |> Map.new()
         {200, response}
       c   -> {c, "There was an unexpected error."}
